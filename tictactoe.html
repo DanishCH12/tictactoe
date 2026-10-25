@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>React Tic-Tac-Toe</title>
+<style>
+:root{--bg:#090f20;--panel:#111d36;--line:#254bba;--blue:#20a9ff;--pink:#ff4db5;--text:#f6f7ff;--muted:#a9b9d7;--green:#00c99a;--purple:#852cff}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;padding:28px 16px;display:flex;justify-content:center;align-items:center;background:radial-gradient(ellipse at top,#19264d 0%,#0b1228 48%,#070b17 100%);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+.app{width:min(100%,610px);text-align:center}.title{font-size:clamp(2rem,7vw,3.3rem);font-weight:750;letter-spacing:-1.4px;margin:0 0 8px}.title span{background:linear-gradient(90deg,#8b5cf6,#d16cff);-webkit-background-clip:text;background-clip:text;color:transparent}.subtitle{margin:0 0 28px;color:var(--muted);font-size:clamp(1rem,3.6vw,1.35rem)}
+.status{padding:19px 14px;border:1px solid #203d82;background:linear-gradient(110deg,#142442,#172342);border-radius:21px;font-size:clamp(1.15rem,4.5vw,1.6rem);margin-bottom:18px;box-shadow:0 8px 25px #0002}.status strong{color:var(--blue)}
+.board-wrap{padding:clamp(14px,4vw,24px);background:linear-gradient(145deg,#14213d,#101a32);border:1px solid #1e3472;border-radius:26px;box-shadow:0 16px 40px #0003}
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;max-width:410px;margin:auto}.cell{aspect-ratio:1;min-width:0;border:2px solid #244db8;border-radius:15px;background:linear-gradient(145deg,#1a2b49,#17233b);color:white;font-size:clamp(2.7rem,13vw,5rem);font-weight:400;display:grid;place-items:center;cursor:pointer;transition:background .15s,transform .15s,box-shadow .15s}.cell:hover:not(:disabled){background:#24395d;transform:translateY(-2px);box-shadow:0 0 18px #287dff25}.cell:disabled{cursor:default}.cell.x{color:var(--blue);text-shadow:0 0 18px #168eff55}.cell.o{color:var(--pink);text-shadow:0 0 18px #ff4db555}.cell.winner{background:#163f4c;border-color:#00d8b0;box-shadow:0 0 20px #00d8b033}
+.buttons{display:flex;gap:14px;justify-content:center;margin-top:25px}.btn{border:1px solid transparent;border-radius:16px;padding:15px 22px;min-width:0;font-size:clamp(.95rem,3.3vw,1.15rem);font-weight:750;cursor:pointer;color:white;box-shadow:0 8px 20px #0003}.restart{background:linear-gradient(120deg,#00bd91,#00a887);border-color:#00edbd}.undo{background:linear-gradient(120deg,#913cff,#6c20e9);border-color:#ae75ff}.btn:disabled{opacity:.45;cursor:not-allowed}.btn:focus-visible,.cell:focus-visible{outline:3px solid #fff;outline-offset:3px}.info{color:var(--muted);font-size:.88rem;line-height:1.55;margin:20px 0 0}
+@media(max-width:420px){body{padding:22px 12px}.buttons{gap:9px}.btn{padding:14px 13px;flex:1}.cell{border-radius:11px;gap:6px}.status{padding:16px 10px}}
+</style></head>
+<body><main class="app">
+<h1 class="title">React <span>Tic-Tac-Toe</span></h1>
+<p class="subtitle">Beginner-friendly learning activity</p>
+<div class="status" id="status" aria-live="polite">Next Player: <strong>X</strong></div>
+<div class="board-wrap"><div class="board" id="board" role="group" aria-label="Tic-Tac-Toe game board"></div></div>
+<div class="buttons"><button class="btn restart" id="restart">⟳ &nbsp; Restart Game</button><button class="btn undo" id="undo">↶ &nbsp; Undo</button></div>
+<p class="info">Take turns placing X and O. Get three in a row to win. Use Undo to reverse the last move.</p>
+</main>
+<script>
+let squares=Array(9).fill(null), next='X', history=[];
+const board=document.getElementById('board'),status=document.getElementById('status'),undoBtn=document.getElementById('undo');
+const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+function winningLine(){for(const line of wins){if(squares[line[0]]&&squares[line[0]]===squares[line[1]]&&squares[line[1]]===squares[line[2]])return line}return null}
+function move(i){if(squares[i]||winningLine()||squares.every(Boolean))return;history.push({squares:[...squares],next});squares[i]=next;next=next==='X'?'O':'X';render()}
+function render(){
+ const line=winningLine(),winner=line?squares[line[0]]:null;
+ status.innerHTML=winner?`Winner: <strong>${winner}</strong> 🎉`:squares.every(Boolean)?'It’s a draw!':`Next Player: <strong>${next}</strong>`;
+ board.innerHTML='';
+ squares.forEach((value,i)=>{const cell=document.createElement('button');cell.type='button';cell.className='cell'+(value?' '+value.toLowerCase():'')+(line&&line.includes(i)?' winner':'');cell.textContent=value||'';cell.setAttribute('aria-label',`Cell ${i+1}${value?', '+value:''}`);cell.disabled=!!value||!!winner||squares.every(Boolean);cell.addEventListener('click',()=>move(i));board.appendChild(cell)});
+ undoBtn.disabled=history.length===0;
+}
+document.getElementById('restart').addEventListener('click',()=>{squares=Array(9).fill(null);next='X';history=[];render()});
+undoBtn.addEventListener('click',()=>{const last=history.pop();if(last){squares=[...last.squares];next=last.next;render()}});
+render();
+</script></body></html>
